@@ -31,8 +31,9 @@ This package includes a basic template for a 3D city builder in Godot 4.1.1.stab
 ### Added Controls
 | Key | Command |
 | --- | --- |
-| <kbd>Ctrl + j| increase build height |
-| <kbd>Ctrl + k</kbd> | decrease build height |
+| <kbd>Ctrl + j| Decrease build height |
+| <kbd>Ctrl + k</kbd> | Increase build height |
+
 ### License
 
 MIT License
