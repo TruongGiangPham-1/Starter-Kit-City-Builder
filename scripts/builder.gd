@@ -6,6 +6,7 @@ var map:DataMap
 
 var index:int = 0 # Index of structure being built
 var build_height:int = 0 
+var sequence_dict = {"action_sequence": []} # Creates an empty dictionary.
 
 @export var selector:Node3D # The 'cursor'
 @export var selector_container:Node3D # Node that holds a preview of the structure
@@ -47,6 +48,7 @@ func _process(delta):
 	
 	action_save() # Saving
 	action_load() # Loading
+	action_save_seq()  # save seq
 	
 	# Map position based on mouse
 	
@@ -102,6 +104,11 @@ func action_build(gridmap_position):
 			print("set structure position at", gridmap_position)
 			gridmap.set_cell_item(gridmap_position, index, gridmap.get_orthogonal_index_from_basis(selector.basis))
 	
+	
+		sequence_dict["action_sequence"].append(get_json_from_coord(
+			gridmap_position.x, gridmap_position.y, gridmap_position.z, index
+		))
+		
 		if previous_tile != index:
 			map.cash -= structures[index].price
 			update_cash()
@@ -155,7 +162,22 @@ func cursorUp(gridmap_position, delta):
 	
 	return
 		
+func action_save_seq():
+	if Input.is_action_just_pressed("save_seq"):
 
+		#var json_string = JSON.stringify(sequence_dict)
+		
+		var file = FileAccess.open("res://sequences/seq.json", FileAccess.WRITE)
+		print("seq dict is ", sequence_dict)
+		file.store_string(JSON.stringify(sequence_dict))
+		print("Saved sequence")
+	return
+	
+func get_json_from_coord(x:int, y:int, z:int, object:int)->Dictionary:
+	var parse = {
+		 "x": x, "y": y, "z": z,  "object": object
+	}
+	return parse
 
 func action_save():
 	if Input.is_action_just_pressed("save"):
