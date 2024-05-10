@@ -5,6 +5,7 @@ extends Node3D
 var map:DataMap
 
 var index:int = 0 # Index of structure being built
+var build_height:int = 0 
 
 @export var selector:Node3D # The 'cursor'
 @export var selector_container:Node3D # Node that holds a preview of the structure
@@ -52,13 +53,26 @@ func _process(delta):
 	var world_position = plane.intersects_ray(
 		view_camera.project_ray_origin(get_viewport().get_mouse_position()),
 		view_camera.project_ray_normal(get_viewport().get_mouse_position()))
-
-	var gridmap_position = Vector3(round(world_position.x), 0, round(world_position.z))
+	
+	var gridmap_position = Vector3(round(world_position.x), 0 + build_height, round(world_position.z))
 	selector.position = lerp(selector.position, gridmap_position, delta * 40)
+	
+	change_build_height()
 	
 	action_build(gridmap_position)
 	action_demolish(gridmap_position)
+	action_demolish(gridmap_position)
+	
+	
+func change_build_height():
+	if Input.is_action_just_pressed("increase_build_height"):
+		print("buildheight=",build_height)
+		build_height += 1
+	elif Input.is_action_just_pressed("decrease_build_height"):
+		build_height = (build_height > 0) if (build_height - 1) else 0
+		print("buildheight=",build_height)
 
+	
 # Retrieve the mesh from a PackedScene, used for dynamically creating a MeshLibrary
 
 func get_mesh(packed_scene):
@@ -76,10 +90,18 @@ func get_mesh(packed_scene):
 
 func action_build(gridmap_position):
 	if Input.is_action_just_pressed("build"):
-		
+
+		print("build height is ", build_height)
 		var previous_tile = gridmap.get_cell_item(gridmap_position)
-		gridmap.set_cell_item(gridmap_position, index, gridmap.get_orthogonal_index_from_basis(selector.basis))
+		var gridmap_position_up = Vector3(gridmap_position.x, gridmap_position.y + 1, gridmap_position.z)
 		
+		if (previous_tile == index):
+			print("set structure position at", gridmap_position_up)
+			gridmap.set_cell_item(gridmap_position, index, gridmap.get_orthogonal_index_from_basis(selector.basis))
+		else:
+			print("set structure position at", gridmap_position)
+			gridmap.set_cell_item(gridmap_position, index, gridmap.get_orthogonal_index_from_basis(selector.basis))
+	
 		if previous_tile != index:
 			map.cash -= structures[index].price
 			update_cash()
@@ -123,6 +145,17 @@ func update_cash():
 	cash_display.text = "$" + str(map.cash)
 
 # Saving/load
+
+func cursorUp(gridmap_position, delta):
+	if Input.is_action_just_pressed("cursorUp"):
+		print("cursorup")
+		selector.position = lerp(selector.position, gridmap_position, delta * 40)
+		
+		return Vector3(gridmap_position.x, gridmap_position.y + 1, gridmap_position.z)
+	
+	return
+		
+
 
 func action_save():
 	if Input.is_action_just_pressed("save"):
